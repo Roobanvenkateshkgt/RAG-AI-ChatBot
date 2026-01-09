@@ -1,124 +1,123 @@
 // content.js
 export const weeklyConfig = {
-    weekID: "2026_WEEK_01_MARATHON", // Change this to reset the scoreboard
-    topicName: "AMC 8: The 50-Question Mastery Challenge",
-    topicDescription: "A comprehensive deep-dive into Ratios, Proportions, Work Rates, and Percentages. Total Mastery starts here.",
+    weekID: "2026_JAN_W2",
+    lastWeekWinner: "MathNinja_99", // Update this every Sunday to crown the new King/Queen
+    topicName: "AMC 8: The Weekly Sprint",
     
     questions: [
-        // --- RATIOS & PROPORTIONS ---
-        {
-            category: "Ratios",
-            question: "The ratio of boys to girls in a class is 3:5. If there are 40 students total, how many are girls?",
-            options: ["15", "20", "25", "30"],
-            answer: 2,
-            explanation: "Total parts: 3+5=8. Each part is 40/8 = 5. Girls: 5 \\times 5 = 25."
+        // --- MONDAY (dayID: 1) ---
+        { 
+            dayID: 1, 
+            q: "If the ratio $x:y = 3:4$ and $x=12$, what is the value of $y$?", 
+            options: ["9", "16", "12", "15"], 
+            ans: 1, 
+            explain: "Since $x=12$, we set up the proportion: $\\frac{12}{y} = \\frac{3}{4}$. Multiplying both sides by $y$ and cross-multiplying gives $3y = 48$, so $y = 16$." 
         },
-        {
-            category: "Ratios",
-            question: "A map scale is 1:50,000. If two cities are 10cm apart on the map, what is the actual distance in km?",
-            options: ["5 km", "50 km", "0.5 km", "500 km"],
-            answer: 0,
-            explanation: "$10 \\text{ cm} \\times 50,000 = 500,000 \\text{ cm}. Since 100,000 \\text{ cm} = 1 \\text{ km}, the distance is 5 km."
+        { 
+            dayID: 1, 
+            q: "What is $20\\%$ of $80$?", 
+            options: ["16", "20", "10", "24"], 
+            ans: 0, 
+            explain: "To find the percentage, convert $20\\%$ to a decimal ($0.20$) and multiply: $0.20 \\times 80 = 16$." 
         },
-        {
-            category: "Ratios",
-            question: "The angles of a quadrilateral are in the ratio $1:2:3:4$. What is the measure of the largest angle?",
-            options: ["36°", "72°", "108°", "144°"],
-            answer: 3,
-            explanation: "Sum of angles = 360°. Total parts: $1+2+3+4=10$. One part = 36°. Largest = $4 \\times 36 = 144^{\\circ}$."
-        },
-        {
-            category: "Ratios",
-            question: "If $a:b = 2:3$ and $b:c = 4:5$, find the ratio $a:c$.",
-            options: ["2:5", "8:15", "6:15", "1:2"],
-            answer: 1,
-            explanation: "Multiply the ratios: $\\frac{a}{b} \\times \\frac{b}{c} = \\frac{2}{3} \\times \\frac{4}{5} = \\frac{8}{15}$."
-        },
-        {
-            category: "Ratios",
-            question: "A 60cm rope is cut into two pieces with a ratio of $7:8$. How long is the shorter piece?",
-            options: ["24cm", "28cm", "32cm", "30cm"],
-            answer: 1,
-            explanation: "Total parts: $7+8=15$. $60/15 = 4$. Shorter piece: $7 \\times 4 = 28$."
+        { 
+            dayID: 1, 
+            q: "A car travels $60$ miles in $1$ hour. How many miles does it travel in $15$ minutes?", 
+            options: ["10", "15", "20", "30"], 
+            ans: 1, 
+            explain: "$15$ minutes is $\\frac{15}{60} = \\frac{1}{4}$ of an hour. Distance = $Speed \\times Time = 60 \\times \\frac{1}{4} = 15$ miles." 
         },
 
-        // --- WORK RATES ---
-        {
-            category: "Work Rate",
-            question: "Pipe A fills a tank in 10 hours. Pipe B fills it in 15. Together, how long does it take?",
-            options: ["5 hours", "6 hours", "12 hours", "4 hours"],
-            answer: 1,
-            explanation: "$\\frac{10 \\times 15}{10+15} = \\frac{150}{25} = 6$."
+        // --- TUESDAY (dayID: 2) ---
+        { 
+            dayID: 2, 
+            q: "The ratio of cats to dogs in a shelter is $2:5$. If there are $35$ animals in total, how many are cats?", 
+            options: ["10", "14", "25", "7"], 
+            ans: 0, 
+            explain: "Total parts = $2 + 5 = 7$. Value of one part = $35 \\div 7 = 5$. Cats = $2 \\times 5 = 10$." 
         },
-        {
-            category: "Work Rate",
-            question: "3 workers can build a wall in 4 days. How many days would it take 6 workers?",
-            options: ["8", "4", "2", "6"],
-            answer: 2,
-            explanation: "This is inverse proportion. $3 \\times 4 = 6 \\times x$. $12 = 6x$, so $x=2$."
+        { 
+            dayID: 2, 
+            q: "A hoodie costs $\$50$ but is on sale for $10\\%$ off. What is the final price?", 
+            options: ["$\$40$", "$\$45$", "$\$49$", "$\$35$"], 
+            ans: 1, 
+            explain: "Discount = $0.10 \\times 50 = 5$. Final price = $50 - 5 = 45$." 
         },
-        {
-            category: "Work Rate",
-            question: "John can paint a room in 3 hours. Jim can do it in 2. If they work together, what fraction of the room is painted in 1 hour?",
-            options: ["1/5", "5/6", "1/6", "2/3"],
-            answer: 1,
-            explanation: "Rates: $\\frac{1}{3} + \\frac{1}{2} = \\frac{2+3}{6} = \\frac{5}{6}$."
-        },
-        {
-            category: "Work Rate",
-            question: "A machine produces 50 widgets in 2 hours. How many widgets in 5 hours?",
-            options: ["100", "125", "150", "250"],
-            answer: 1,
-            explanation: "Rate = $50/2 = 25$ widgets/hr. $25 \\times 5 = 125$."
+        { 
+            dayID: 2, 
+            q: "Alice can paint a room in $2$ hours, and Bob can paint it in $3$ hours. Working together, how many hours will it take?", 
+            options: ["$2.5$", "$1.2$", "$5$", "$1$"], 
+            ans: 1, 
+            explain: "Use the product-over-sum formula: $\\frac{2 \\times 3}{2+3} = \\frac{6}{5} = 1.2$ hours." 
         },
 
-        // --- PERCENTAGES ---
-        {
-            category: "Percentages",
-            question: "What is 15% of 20% of 500?",
-            options: ["15", "20", "30", "10"],
-            answer: 0,
-            explanation: "$0.20 \\times 500 = 100$. $15\\%$ of $100 = 15$."
+        // --- WEDNESDAY (dayID: 3) ---
+        { 
+            dayID: 3, 
+            q: "What is $\\frac{1}{2}$ of $\\frac{1}{4}$ of $100$?", 
+            options: ["25", "12.5", "50", "10"], 
+            ans: 1, 
+            explain: "First find $\\frac{1}{4}$ of $100 = 25$. Then find $\\frac{1}{2}$ of $25 = 12.5$." 
         },
-        {
-            category: "Percentages",
-            question: "A price increases by 20%, then decreases by 20%. What is the total change?",
-            options: ["No change", "4% decrease", "4% increase", "2% decrease"],
-            answer: 1,
-            explanation: "$100 \\times 1.20 = 120$. $120 \\times 0.80 = 96$. $100 \\to 96$ is a $4\\%$ decrease."
+        { 
+            dayID: 3, 
+            q: "If the ratio $3:5$ is equivalent to $x:25$, what is the value of $x$?", 
+            options: ["15", "10", "20", "5"], 
+            ans: 0, 
+            explain: "Since $25$ is $5 \\times 5$, we multiply the first part of the ratio by $5$ as well: $3 \\times 5 = 15$." 
         },
-        {
-            category: "Percentages",
-            question: "If 40% of a number is 120, what is the number?",
-            options: ["300", "480", "240", "360"],
-            answer: 0,
-            explanation: "$0.4x = 120 \\Rightarrow x = 120 / 0.4 = 300$."
+        { 
+            dayID: 3, 
+            q: "A runner completes $4$ miles in $32$ minutes. What is their average pace in minutes per mile?", 
+            options: ["8", "4", "6", "10"], 
+            ans: 0, 
+            explain: "$32 \\text{ minutes} \\div 4 \\text{ miles} = 8 \\text{ minutes per mile}$." 
         },
-        {
-            category: "Percentages",
-            question: "In a box of 40 candies, 12 are red. What percentage are red?",
-            options: ["12%", "25%", "30%", "40%"],
-            answer: 2,
-            explanation: "$(12/40) \\times 100 = 0.3 \\times 100 = 30\\%$."
+
+        // --- THURSDAY (dayID: 4) ---
+        { 
+            dayID: 4, 
+            q: "$30$ is $60\\%$ of what number?", 
+            options: ["50", "60", "40", "100"], 
+            ans: 0, 
+            explain: "Set up the equation $0.60x = 30$. Solve for $x$: $x = 30 \\div 0.60 = 50$." 
         },
-        
-        // --- ADDING MORE QUESTIONS (MIXED AMC 8 STYLE) ---
-        {
-            category: "Ratios",
-            question: "A recipe uses 2 cups of sugar for every 5 cups of flour. If you use 20 cups of flour, how much sugar is needed?",
-            options: ["4", "8", "10", "12"],
-            answer: 1,
-            explanation: "$2/5 = x/20 \\Rightarrow 5x = 40 \\Rightarrow x = 8$."
+        { 
+            dayID: 4, 
+            q: "The angles of a triangle are in the ratio $1:1:2$. What is the measure of the largest angle?", 
+            options: ["$45^\\circ$", "$90^\\circ$", "$60^\\circ$", "$120^\\circ$"], 
+            ans: 1, 
+            explain: "Total parts = $1+1+2=4$. Sum of angles = $180^\\circ$. One part = $180 \\div 4 = 45^\\circ$. Largest angle = $2 \\times 45 = 90^\\circ$." 
         },
-        {
-            category: "Work Rate",
-            question: "If 5 cats can catch 5 mice in 5 minutes, how many cats are needed to catch 100 mice in 100 minutes?",
-            options: ["100", "20", "5", "1"],
-            answer: 2,
-            explanation: "1 cat catches 1 mouse in 5 minutes. In 100 minutes, 1 cat catches 20 mice. To catch 100 mice, you need $100/20 = 5$ cats."
+        { 
+            dayID: 4, 
+            q: "If $2$ cats can catch $2$ mice in $2$ minutes, how many mice can $10$ cats catch in $2$ minutes?", 
+            options: ["10", "20", "5", "2"], 
+            ans: 0, 
+            explain: "If $2$ cats catch $2$ mice, then $1$ cat catches $1$ mouse in the same amount of time. Therefore, $10$ cats will catch $10$ mice in $2$ minutes." 
+        },
+
+        // --- FRIDAY (dayID: 5) ---
+        { 
+            dayID: 5, 
+            q: "A price is increased by $10\\%$, and then that new price is increased by another $10\\%$. What is the total percentage increase?", 
+            options: ["$20\\%$", "$21\\%$", "$19\\%$", "$25\\%$"], 
+            ans: 1, 
+            explain: "Let the price be $100$. First increase: $100 \\times 1.1 = 110$. Second increase: $110 \\times 1.1 = 121$. Total increase is $21\\%$." 
+        },
+        { 
+            dayID: 5, 
+            q: "The ratio of the length to width of a rectangle is $4:1$. If the perimeter is $50$, what is the length?", 
+            options: ["10", "20", "40", "5"], 
+            ans: 1, 
+            explain: "Perimeter = $2(L + W)$. $2(4x + x) = 50 \\Rightarrow 10x = 50 \\Rightarrow x = 5$. Length = $4x = 20$." 
+        },
+        { 
+            dayID: 5, 
+            q: "A pump can fill a tank in $4$ hours, but a leak can empty it in $12$ hours. If both are active, how long to fill the tank?", 
+            options: ["3 hours", "6 hours", "8 hours", "4 hours"], 
+            ans: 1, 
+            explain: "Net rate = $\\frac{1}{4} - \\frac{1}{12} = \\frac{3}{12} - \\frac{1}{12} = \\frac{2}{12} = \\frac{1}{6}$. It will take $6$ hours." 
         }
-        
-        // NOTE: Continue adding questions 16-50 using this exact format. 
-        // Ensure you change the 'answer' index (0 for 1st option, 1 for 2nd, etc.)
     ]
 };
