@@ -8,10 +8,10 @@ export const weeklyConfig = {
         // --- RATIOS & PROPORTIONS ---
         {
             category: "Ratios",
-            question: "The ratio of boys to girls in a class is $3:5$. If there are 40 students total, how many are girls?",
+            question: "The ratio of boys to girls in a class is 3:5. If there are 40 students total, how many are girls?",
             options: ["15", "20", "25", "30"],
             answer: 2,
-            explanation: "Total parts: $3+5=8$. Each part is $40/8 = 5$. Girls: $5 \\times 5 = 25$."
+            explanation: "Total parts: 3+5=8. Each part is 40/8 = 5. Girls: 5 \\times 5 = 25."
         },
         {
             category: "Ratios",
