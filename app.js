@@ -14,19 +14,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Setup initial view
+// --- GLOBAL INITIALIZATION ---
+// This runs IMMEDIATELY when the page opens
 document.getElementById('display-topic').innerText = weeklyConfig.topicName;
 document.getElementById('display-desc').innerText = weeklyConfig.topicDescription;
 document.getElementById('week-label').innerText = weeklyConfig.weekID;
-loadLeaderboard(); // Load immediately on start
+
+// CALL THIS NOW so kids see the board before they login
+loadLeaderboard(); 
 
 let currentQ = 0;
 let score = 0;
 let startTime;
 let timerInterval;
 
+// --- BUTTON ACTIONS ---
 document.getElementById('start-btn').onclick = () => {
-    if(!document.getElementById('username').value) return alert("Pick a hero name first!");
+    const nameInput = document.getElementById('username').value.trim();
+    if(!nameInput) return alert("Please enter your Hero Name to start!");
+    
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     startTime = Date.now();
@@ -34,6 +40,7 @@ document.getElementById('start-btn').onclick = () => {
     renderQuestion();
 };
 
+// --- CORE FUNCTIONS ---
 function startTimer() {
     timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -86,8 +93,19 @@ async function finishQuiz() {
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
     document.getElementById('quiz-area').classList.add('hidden');
     document.getElementById('results').classList.remove('hidden');
-    document.getElementById('final-stats').innerHTML = `Score: ${score}/${weeklyConfig.questions.length} <br> Time: ${totalTime}s`;
+    
+    // Badge Logic
+    let badge = "🥈 Silver Finisher";
+    if (score === weeklyConfig.questions.length) badge = "👑 Math King/Queen";
+    else if (score > weeklyConfig.questions.length * 0.8) badge = "🥇 Gold Master";
 
+    document.getElementById('final-stats').innerHTML = `
+        <div style="font-size: 2rem;">${badge}</div>
+        <strong>Score:</strong> ${score}/${weeklyConfig.questions.length} <br> 
+        <strong>Time:</strong> ${totalTime}s
+    `;
+
+    // Save to Firebase
     await addDoc(collection(db, "weeklyScores"), {
         weekID: weeklyConfig.weekID,
         name: document.getElementById('username').value,
@@ -95,25 +113,44 @@ async function finishQuiz() {
         time: totalTime,
         date: new Date()
     });
+    
+    // Refresh the leaderboard one last time to show the user's new score
     loadLeaderboard();
 }
 
 async function loadLeaderboard() {
-    const q = query(
-        collection(db, "weeklyScores"), 
-        where("weekID", "==", weeklyConfig.weekID),
-        orderBy("score", "desc"), 
-        orderBy("time", "asc"), 
-        limit(10)
-    );
-    
-    const snap = await getDocs(q);
-    let html = "";
-    let rank = 1;
-    snap.forEach(doc => {
-        const d = doc.data();
-        const rankClass = rank === 1 ? "rank-1" : "";
-        html += `<tr class="${rankClass}"><td>#${rank++}</td><td>${d.name}</td><td>${d.score}</td><td>${d.time}s</td></tr>`;
-    });
-    document.getElementById('leaderboard-body').innerHTML = html || "<tr><td colspan='4'>Be the first hero!</td></tr>";
+    try {
+        const q = query(
+            collection(db, "weeklyScores"), 
+            where("weekID", "==", weeklyConfig.weekID),
+            orderBy("score", "desc"), 
+            orderBy("time", "asc"), 
+            limit(10)
+        );
+        
+        const snap = await getDocs(q);
+        let html = "";
+        let rank = 1;
+        
+        snap.forEach(doc => {
+            const d = doc.data();
+            let medal = "";
+            if(rank === 1) medal = "🥇 ";
+            if(rank === 2) medal = "🥈 ";
+            if(rank === 3) medal = "🥉 ";
+            
+            html += `<tr>
+                <td>${medal || rank}</td>
+                <td><strong>${d.name}</strong></td>
+                <td>${d.score}</td>
+                <td>${d.time}s</td>
+            </tr>`;
+            rank++;
+        });
+        
+        document.getElementById('leaderboard-body').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>No scores yet. Be the first!</td></tr>";
+    } catch (error) {
+        console.error("Leaderboard error:", error);
+        document.getElementById('leaderboard-body').innerHTML = "<tr><td colspan='4'>Click 'GO' to submit your first score!</td></tr>";
+    }
 }
