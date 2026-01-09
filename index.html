@@ -1,38 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AMC 8 Quiz</title>
-<link rel="stylesheet" href="style.css">
-<script defer src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC 8 Weekly Challenge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .hidden { display: none; }
+        .correct { background: #2e7d32 !important; color: white; border: none; }
+        .incorrect { background: #d32f2f !important; color: white; border: none; }
+        .option-btn { width: 100%; margin: 8px 0; text-align: left; padding: 12px; cursor: pointer; transition: 0.2s; }
+        #analysis { border-left: 5px solid #2e7d32; padding: 20px; background: #f1f8e9; margin-top: 25px; border-radius: 4px; color: #1b5e20; }
+        .status-bar { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 20px; color: #555; }
+        table { width: 100%; margin-top: 20px; }
+    </style>
 </head>
 <body>
-<h1>AMC 8 Quiz</h1>
+    <div id="app">
+        <h1 id="display-topic" style="color: #004dcf;">Loading...</h1>
+        <p id="display-desc"></p>
 
-<label for="studentName">Your Name:</label>
-<input type="text" id="studentName" placeholder="Enter your name">
+        <div id="setup">
+            <label for="username">Enter Nickname for Scoreboard:</label>
+            <input type="text" id="username" placeholder="e.g., MathTitan7">
+            <button id="start-btn" style="width: 100%; background: #004dcf; color: white;">Start Challenge</button>
+        </div>
 
-<div>
-  <label for="topicSelect">Choose Topic:</label>
-  <select id="topicSelect">
-    <option value="amc8_verified">Verified AMC 8 Questions</option>
-  </select>
-  <button onclick="loadTopic(document.getElementById('topicSelect').value)">Start Practice</button>
-  <button onclick="startContest(document.getElementById('topicSelect').value)">Start Contest</button>
-</div>
+        <div id="quiz-area" class="hidden">
+            <div class="status-bar">
+                <span id="q-progress"></span>
+                <span id="timer">Time: 0s</span>
+            </div>
+            <div id="q-text" style="font-size: 1.25rem; margin-bottom: 20px; line-height: 1.5;"></div>
+            <div id="options-container"></div>
+            
+            <div id="analysis" class="hidden">
+                <h4 style="margin-top: 0;">Step-by-Step Analysis:</h4>
+                <p id="explain-text"></p>
+                <button id="next-btn" style="width: 100%;">Next Question →</button>
+            </div>
+        </div>
 
-<div id="timer">⏱️ 0:00</div>
-<div id="question"></div>
-<div id="choices"></div>
+        <div id="results" class="hidden">
+            <h2 style="text-align: center;">Week Complete! 🎉</h2>
+            <div id="final-stats" style="text-align: center; font-size: 1.2rem; margin-bottom: 20px;"></div>
+            
+            <h3>🏆 Weekly Leaderboard (<span id="week-label"></span>)</h3>
+            <table>
+                <thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr></thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+            <button onclick="location.reload()" style="width:100%;">Take Quiz Again</button>
+        </div>
+    </div>
 
-<button onclick="submitAnswer()">Submit</button>
-<button onclick="nextQuestion()">Next</button>
-
-<div id="feedback"></div>
-<div id="solution"></div>
-<div>Score: <span id="score">0</span></div>
-<div id="dashboard"></div>
-
+    <script type="module" src="app.js"></script>
 </body>
 </html>
