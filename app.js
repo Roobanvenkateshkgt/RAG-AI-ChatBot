@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { weeklyConfig } from "./content.js";
 
+// --- STEP 1: VERIFY YOUR CONFIG ---
 const firebaseConfig = {
     apiKey: "AIzaSyAOlqpBpgaK1S7d2TCkWFTU7ZOdJdSBNBM",
     authDomain: "amc8-74254.firebaseapp.com",
@@ -14,18 +15,38 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// --- STEP 2: SETUP APP ---
 const todayNum = new Date().getDay(); 
+// Debug: Check which day the computer thinks it is
+console.log("System thinks Today ID is:", todayNum);
+
 const todayQuestions = weeklyConfig.questions.filter(q => q.dayID === todayNum);
+console.log("Questions found for today:", todayQuestions.length);
+
 let currentQ = 0, score = 0, startTime;
 
+// Load UI text immediately
 document.getElementById('display-day').innerText = `Target: ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][todayNum]}'s Daily 3`;
 document.getElementById('last-winner').innerText = weeklyConfig.lastWeekWinner;
 loadLeaderboard();
 
+// --- STEP 3: THE START BUTTON ---
 document.getElementById('start-btn').onclick = () => {
-    if(!document.getElementById('username').value.trim()) return alert("Enter a name!");
-    if(todayQuestions.length === 0) return alert("No questions for Sunday! Come back tomorrow.");
-    document.getElementById('setup').classList.add('hidden');
+    const user = document.getElementById('username').value.trim();
+    
+    if(!user) {
+        alert("Enter a Hero Name first!");
+        return;
+    }
+
+    if(todayQuestions.length === 0) {
+        alert("No questions are scheduled for today! (Today is " + ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][todayNum] + ")");
+        return;
+    }
+
+    // Success: Hide setup and show quiz
+    console.log("Starting quiz for:", user);
+    document.getElementById('setup').style.display = 'none'; // Using .style.display to be safe
     document.getElementById('quiz-area').classList.remove('hidden');
     startTime = Date.now();
     renderQuestion();
@@ -35,6 +56,7 @@ function renderQuestion() {
     const q = todayQuestions[currentQ];
     document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 3`;
     document.getElementById('q-text').innerHTML = q.q;
+    
     const container = document.getElementById('options-container');
     container.innerHTML = "";
     
@@ -45,16 +67,24 @@ function renderQuestion() {
         btn.onclick = () => {
             const btns = container.querySelectorAll('button');
             btns.forEach(b => b.disabled = true);
-            if(i === q.ans) { btn.classList.add('correct'); score++; }
-            else { btn.classList.add('incorrect'); btns[q.ans].classList.add('correct'); }
+            
+            if(i === q.ans) { 
+                btn.style.background = "#2e7d32";
+                btn.style.color = "white";
+                score++; 
+            } else { 
+                btn.style.background = "#d32f2f";
+                btn.style.color = "white";
+                btns[q.ans].style.background = "#2e7d32";
+                btns[q.ans].style.color = "white";
+            }
+            
             document.getElementById('explain-text').innerHTML = q.explain;
             document.getElementById('analysis').classList.remove('hidden');
-            // FIX: Refresh math symbols after adding text to HTML
             if (window.MathJax) MathJax.typesetPromise();
         };
         container.appendChild(btn);
     });
-    // FIX: Refresh math symbols when the question first appears
     if (window.MathJax) MathJax.typesetPromise();
 }
 
@@ -70,32 +100,43 @@ document.getElementById('next-btn').onclick = () => {
 
 async function submitScore() {
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
-    await addDoc(collection(db, "sprints"), {
-        weekID: weeklyConfig.weekID,
-        dayNum: todayNum,
-        name: document.getElementById('username').value.trim(),
-        score: score,
-        time: totalTime
-    });
-    location.reload();
+    try {
+        await addDoc(collection(db, "sprints"), {
+            weekID: weeklyConfig.weekID,
+            dayNum: todayNum,
+            dayName: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][todayNum],
+            name: document.getElementById('username').value.trim(),
+            score: score,
+            time: totalTime
+        });
+        alert("Daily Mission Complete!");
+        location.reload();
+    } catch (e) {
+        console.error("Error saving score: ", e);
+        alert("Error saving score. Check Console.");
+    }
 }
 
 async function loadLeaderboard() {
-    const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
-    const players = {};
-    snap.forEach(doc => {
-        const d = doc.data();
-        if(!players[d.name]) players[d.name] = { score: 0, time: 0 };
-        players[d.name].score += d.score;
-        players[d.name].time += d.time;
-    });
+    try {
+        const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
+        const players = {};
+        snap.forEach(doc => {
+            const d = doc.data();
+            if(!players[d.name]) players[d.name] = { score: 0, time: 0 };
+            players[d.name].score += d.score;
+            players[d.name].time += d.time;
+        });
 
-    const ranked = Object.keys(players).sort((a, b) => {
-        if (players[b].score !== players[a].score) return players[b].score - players[a].score;
-        return players[a].time - players[b].time;
-    });
+        const ranked = Object.keys(players).sort((a, b) => {
+            if (players[b].score !== players[a].score) return players[b].score - players[a].score;
+            return players[a].time - players[b].time;
+        });
 
-    document.getElementById('leaderboard-body').innerHTML = ranked.map((name, i) => `
-        <tr><td>${i+1}</td><td>${name}</td><td>${players[name].score}/15</td><td>${players[name].time}s</td></tr>
-    `).join('') || "<tr><td colspan='4'>No heroes yet. Be the first!</td></tr>";
+        document.getElementById('leaderboard-body').innerHTML = ranked.map((name, i) => `
+            <tr><td>${i+1}</td><td>${name}</td><td>${players[name].score}/15</td><td>${players[name].time}s</td></tr>
+        `).join('') || "<tr><td colspan='4'>Be the first to score!</td></tr>";
+    } catch (e) {
+        console.log("Leaderboard empty or error:", e);
+    }
 }
