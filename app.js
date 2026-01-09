@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { weeklyConfig } from "./content.js";
 
-// YOUR FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyAOlqpBpgaK1S7d2TCkWFTU7ZOdJdSBNBM",
     authDomain: "amc8-74254.firebaseapp.com",
@@ -15,19 +14,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Initialize Header Content
+// Setup initial view
 document.getElementById('display-topic').innerText = weeklyConfig.topicName;
 document.getElementById('display-desc').innerText = weeklyConfig.topicDescription;
 document.getElementById('week-label').innerText = weeklyConfig.weekID;
+loadLeaderboard(); // Load immediately on start
 
 let currentQ = 0;
 let score = 0;
 let startTime;
-let user = "";
 let timerInterval;
 
 document.getElementById('start-btn').onclick = () => {
-    user = document.getElementById('username').value.trim() || "Anonymous";
+    if(!document.getElementById('username').value) return alert("Pick a hero name first!");
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     startTime = Date.now();
@@ -38,12 +37,14 @@ document.getElementById('start-btn').onclick = () => {
 function startTimer() {
     timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById('timer').innerText = `Time: ${elapsed}s`;
+        document.getElementById('timer').innerText = `⏱️ ${elapsed}s`;
     }, 1000);
 }
 
 function renderQuestion() {
     const q = weeklyConfig.questions[currentQ];
+    const progress = ((currentQ) / weeklyConfig.questions.length) * 100;
+    document.getElementById('progress-bar').style.width = progress + "%";
     document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of ${weeklyConfig.questions.length}`;
     document.getElementById('q-text').innerHTML = q.question;
     document.getElementById('analysis').classList.add('hidden');
@@ -76,11 +77,8 @@ function renderQuestion() {
 
 document.getElementById('next-btn').onclick = () => {
     currentQ++;
-    if(currentQ < weeklyConfig.questions.length) {
-        renderQuestion();
-    } else {
-        finishQuiz();
-    }
+    if(currentQ < weeklyConfig.questions.length) renderQuestion();
+    else finishQuiz();
 };
 
 async function finishQuiz() {
@@ -88,19 +86,15 @@ async function finishQuiz() {
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
     document.getElementById('quiz-area').classList.add('hidden');
     document.getElementById('results').classList.remove('hidden');
-    document.getElementById('final-stats').innerHTML = `<strong>Score:</strong> ${score}/${weeklyConfig.questions.length} | <strong>Time:</strong> ${totalTime}s`;
+    document.getElementById('final-stats').innerHTML = `Score: ${score}/${weeklyConfig.questions.length} <br> Time: ${totalTime}s`;
 
-    // Save Data to Firebase
-    try {
-        await addDoc(collection(db, "weeklyScores"), {
-            weekID: weeklyConfig.weekID,
-            name: user,
-            score: score,
-            time: totalTime,
-            date: new Date()
-        });
-    } catch (e) { console.error("Score save failed", e); }
-
+    await addDoc(collection(db, "weeklyScores"), {
+        weekID: weeklyConfig.weekID,
+        name: document.getElementById('username').value,
+        score: score,
+        time: totalTime,
+        date: new Date()
+    });
     loadLeaderboard();
 }
 
@@ -118,7 +112,8 @@ async function loadLeaderboard() {
     let rank = 1;
     snap.forEach(doc => {
         const d = doc.data();
-        html += `<tr><td>${rank++}</td><td>${d.name}</td><td>${d.score}</td><td>${d.time}s</td></tr>`;
+        const rankClass = rank === 1 ? "rank-1" : "";
+        html += `<tr class="${rankClass}"><td>#${rank++}</td><td>${d.name}</td><td>${d.score}</td><td>${d.time}s</td></tr>`;
     });
-    document.getElementById('leaderboard-body').innerHTML = html || "<tr><td colspan='4'>No scores yet this week!</td></tr>";
+    document.getElementById('leaderboard-body').innerHTML = html || "<tr><td colspan='4'>Be the first hero!</td></tr>";
 }
