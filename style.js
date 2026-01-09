@@ -7,7 +7,7 @@ let mode = 'practice';
 let leaderboard = [];
 
 async function loadTopic(topic) {
-    const response = await fetch(`problems/${topic}.json`);
+    const response = await fetch(`${topic}.json`);
     questions = await response.json();
     index = 0;
     score = 0;
@@ -97,3 +97,4 @@ function nextBadge(){
     if(score/questions.length>=0.4) return '🥉 Bronze';
     return '💡 Try Again';
 }
+
