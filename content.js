@@ -15,10 +15,10 @@ export const weeklyConfig = {
         },
         {
             category: "Ratios",
-            question: "A map scale is $1:50,000$. If two cities are 10cm apart on the map, what is the actual distance in km?",
+            question: "A map scale is 1:50,000. If two cities are 10cm apart on the map, what is the actual distance in km?",
             options: ["5 km", "50 km", "0.5 km", "500 km"],
             answer: 0,
-            explanation: "$10 \\text{ cm} \\times 50,000 = 500,000 \\text{ cm}$. Since $100,000 \\text{ cm} = 1 \\text{ km}$, the distance is 5 km."
+            explanation: "$10 \\text{ cm} \\times 50,000 = 500,000 \\text{ cm}. Since 100,000 \\text{ cm} = 1 \\text{ km}, the distance is 5 km."
         },
         {
             category: "Ratios",
