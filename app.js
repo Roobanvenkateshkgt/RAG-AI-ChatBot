@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { weeklyConfig } from "./content.js";
 
 const firebaseConfig = {
@@ -14,45 +14,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// State Management
 const todayNum = new Date().getDay(); 
 const todayQuestions = weeklyConfig.questions.filter(q => q.dayID === todayNum);
 let currentQ = 0, score = 0, startTime, timerInterval;
 
-// INITIALIZE ON LOAD
+// THE FIX: Wait for HTML to load
 window.onload = () => {
-    // Fill text values
-    document.getElementById('display-topic').innerText = weeklyConfig.topicName || "Hero Academy";
-    document.getElementById('display-day').innerText = `Current Mission: ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][todayNum]}`;
+    // 1. Initialize UI
+    document.getElementById('display-topic').innerText = weeklyConfig.topicName || "AMC 8 Sprint";
+    document.getElementById('display-day').innerText = `Today is ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][todayNum]}`;
     document.getElementById('last-winner').innerText = weeklyConfig.lastWeekWinner;
-
-    // Load Sidebar
+    
+    // 2. Load Scores
     loadLeaderboard();
 
-    // Setup Start Button
-    document.getElementById('start-btn').onclick = () => {
-        const user = document.getElementById('username').value.trim();
-        if(!user) return alert("Enter your name first!");
-        if(todayQuestions.length === 0) return alert("No questions are scheduled for today! (Sunday is a rest day).");
-
-        document.getElementById('setup').classList.add('hidden');
-        document.getElementById('quiz-area').classList.remove('hidden');
-        startTime = Date.now();
-        startTimer();
-        renderQuestion();
-    };
-
-    // Setup Next Button
-    document.getElementById('next-btn').onclick = () => {
-        currentQ++;
-        if(currentQ < todayQuestions.length) {
-            document.getElementById('analysis').classList.add('hidden');
-            renderQuestion();
-        } else {
-            submitFinalScore();
-        }
-    };
+    // 3. Setup Button Listeners
+    document.getElementById('start-btn').onclick = startQuiz;
+    document.getElementById('next-btn').onclick = nextQuestion;
 };
+
+function startQuiz() {
+    const user = document.getElementById('username').value.trim();
+    if(!user) return alert("Please enter a name!");
+    if(todayQuestions.length === 0) return alert("No questions today! See you tomorrow.");
+
+    document.getElementById('setup').classList.add('hidden');
+    document.getElementById('quiz-area').classList.remove('hidden');
+    
+    startTime = Date.now();
+    startTimer();
+    renderQuestion();
+}
 
 function startTimer() {
     timerInterval = setInterval(() => {
@@ -63,7 +55,7 @@ function startTimer() {
 
 function renderQuestion() {
     const q = todayQuestions[currentQ];
-    document.getElementById('q-progress').innerText = `Daily Goal: ${currentQ + 1} of ${todayQuestions.length}`;
+    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 3`;
     document.getElementById('q-text').innerHTML = q.q;
     
     const container = document.getElementById('options-container');
@@ -76,7 +68,6 @@ function renderQuestion() {
         btn.onclick = () => {
             const btns = container.querySelectorAll('button');
             btns.forEach(b => b.disabled = true);
-            
             if(i === q.ans) {
                 btn.classList.add('correct');
                 score++;
@@ -84,7 +75,6 @@ function renderQuestion() {
                 btn.classList.add('incorrect');
                 btns[q.ans].classList.add('correct');
             }
-            
             document.getElementById('explain-text').innerHTML = q.explain;
             document.getElementById('analysis').classList.remove('hidden');
             if (window.MathJax) MathJax.typesetPromise();
@@ -94,55 +84,56 @@ function renderQuestion() {
     if (window.MathJax) MathJax.typesetPromise();
 }
 
-async function submitFinalScore() {
-    clearInterval(timerInterval);
-    const totalTime = Math.floor((Date.now() - startTime) / 1000);
-    const user = document.getElementById('username').value.trim();
-
-    try {
-        await addDoc(collection(db, "sprints"), {
-            weekID: weeklyConfig.weekID,
-            dayNum: todayNum,
-            name: user,
-            score: score,
-            time: totalTime,
-            timestamp: new Date()
-        });
-        alert(`Mission Complete! You got ${score}/3 correct in ${totalTime} seconds.`);
-        location.reload();
-    } catch (e) {
-        console.error("Score Save Error: ", e);
+function nextQuestion() {
+    currentQ++;
+    if(currentQ < todayQuestions.length) {
+        document.getElementById('analysis').classList.add('hidden');
+        renderQuestion();
+    } else {
+        finishQuiz();
     }
 }
 
+async function finishQuiz() {
+    clearInterval(timerInterval);
+    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+    const name = document.getElementById('username').value.trim();
+
+    await addDoc(collection(db, "sprints"), {
+        weekID: weeklyConfig.weekID,
+        day: todayNum,
+        name: name,
+        score: score,
+        time: totalTime,
+        date: new Date()
+    });
+
+    alert(`Daily Goal Met! Score: ${score}/3`);
+    location.reload();
+}
+
 async function loadLeaderboard() {
-    try {
-        const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
-        const players = {};
+    const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
+    const players = {};
 
-        // Aggregate scores for the week
-        snap.forEach(doc => {
-            const d = doc.data();
-            if(!players[d.name]) players[d.name] = { totalPts: 0, totalTime: 0 };
-            players[d.name].totalPts += d.score;
-            players[d.name].totalTime += d.time;
-        });
+    snap.forEach(doc => {
+        const d = doc.data();
+        if(!players[d.name]) players[d.name] = { totalScore: 0, totalTime: 0 };
+        players[d.name].totalScore += d.score;
+        players[d.name].totalTime += d.time;
+    });
 
-        // Sort: Points (desc), then Time (asc)
-        const ranked = Object.keys(players).sort((a, b) => {
-            if (players[b].totalPts !== players[a].totalPts) return players[b].totalPts - players[a].totalPts;
-            return players[a].totalTime - players[b].totalTime;
-        });
+    const ranked = Object.keys(players).sort((a, b) => {
+        if (players[b].totalScore !== players[a].totalScore) return players[b].totalScore - players[a].totalScore;
+        return players[a].totalTime - players[b].totalTime;
+    });
 
-        document.getElementById('leaderboard-body').innerHTML = ranked.map((name, i) => `
-            <tr>
-                <td>${i+1}</td>
-                <td><strong>${name}</strong></td>
-                <td>${players[name].totalPts}/15</td>
-                <td>${players[name].totalTime}s</td>
-            </tr>
-        `).join('') || "<tr><td colspan='4'>Be the first to finish!</td></tr>";
-    } catch (e) {
-        console.error("Leaderboard Error: ", e);
-    }
+    document.getElementById('leaderboard-body').innerHTML = ranked.map((name, i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td>${name}</td>
+            <td>${players[name].totalScore}/15</td>
+            <td>${players[name].totalTime}s</td>
+        </tr>
+    `).join('') || "<tr><td colspan='4'>No scores yet!</td></tr>";
 }
