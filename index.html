@@ -3,56 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC 8 Weekly Challenge</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <title>AMC 8 Hero Academy</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
+        :root { --primary: #4cc9f0; --secondary: #4895ef; --accent: #f72585; --success: #4caf50; --bg: #f0f4f8; }
+        body { font-family: 'Nunito', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        h1, h2, h3 { family: 'Fredoka One', cursive; color: #2b2d42; }
+
+        /* Main Layout */
+        .dashboard { display: grid; grid-template-columns: 1fr 300px; gap: 20px; max-width: 1200px; margin: 0 auto; }
+        
+        /* Quiz Container */
+        .main-content { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+        
+        /* Scoreboard Sidebar */
+        .sidebar { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 20px; }
+        
+        /* Bubbly Buttons */
+        .option-btn { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #e0e0e0; border-radius: 15px; background: white; font-size: 1.1rem; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .option-btn:hover:not(:disabled) { transform: translateY(-3px); border-color: var(--primary); background: #f0fbff; }
+        .correct { background: var(--success) !important; color: white; border-color: #388e3c !important; }
+        .incorrect { background: var(--accent) !important; color: white; border-color: #c2185b !important; }
+
+        /* Progress Bar */
+        .progress-container { background: #e0e0e0; border-radius: 10px; height: 10px; margin: 20px 0; overflow: hidden; }
+        .progress-fill { background: var(--primary); height: 100%; transition: width 0.5s ease; }
+
+        /* Scoreboard Table */
+        .sb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .sb-table tr { border-bottom: 1px solid #eee; }
+        .sb-table th { color: var(--secondary); text-align: left; padding-bottom: 10px; }
+        .rank-1 { color: #ffd700; font-weight: bold; }
+
         .hidden { display: none; }
-        .correct { background: #2e7d32 !important; color: white; border: none; }
-        .incorrect { background: #d32f2f !important; color: white; border: none; }
-        .option-btn { width: 100%; margin: 8px 0; text-align: left; padding: 12px; cursor: pointer; transition: 0.2s; }
-        #analysis { border-left: 5px solid #2e7d32; padding: 20px; background: #f1f8e9; margin-top: 25px; border-radius: 4px; color: #1b5e20; }
-        .status-bar { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 20px; color: #555; }
-        table { width: 100%; margin-top: 20px; }
+        input[type="text"] { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 100%; margin-bottom: 15px; }
+        .start-btn { background: var(--secondary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.2rem; }
+
+        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } .sidebar { position: static; } }
     </style>
 </head>
 <body>
-    <div id="app">
-        <h1 id="display-topic" style="color: #004dcf;">Loading...</h1>
-        <p id="display-desc"></p>
 
-        <div id="setup">
-            <label for="username">Enter Nickname for Scoreboard:</label>
-            <input type="text" id="username" placeholder="e.g., MathTitan7">
-            <button id="start-btn" style="width: 100%; background: #004dcf; color: white;">Start Challenge</button>
+    <div class="dashboard">
+        <div class="main-content">
+            <h1 id="display-topic">Math Hero Academy</h1>
+            <p id="display-desc">Loading your mission...</p>
+
+            <div id="setup">
+                <h3>Ready for your mission?</h3>
+                <input type="text" id="username" placeholder="Pick a Cool Hero Name (e.g. MathWizard)">
+                <button class="start-btn" id="start-btn">GO! 🚀</button>
+            </div>
+
+            <div id="quiz-area" class="hidden">
+                <div class="progress-container"><div id="progress-bar" class="progress-fill" style="width: 0%"></div></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <span id="q-progress">Question 1</span>
+                    <span id="timer">⏱️ 0s</span>
+                </div>
+                <div id="q-text" style="font-size: 1.4rem; margin: 30px 0;"></div>
+                <div id="options-container"></div>
+                
+                <div id="analysis" class="hidden" style="background: #e8f5e9; padding: 20px; border-radius: 15px; margin-top: 20px;">
+                    <h4 style="margin: 0; color: #2e7d32;">Solution Secret:</h4>
+                    <p id="explain-text"></p>
+                    <button class="start-btn" id="next-btn" style="background: var(--success);">Next Question ➡️</button>
+                </div>
+            </div>
+
+            <div id="results" class="hidden" style="text-align: center;">
+                <h2>Mission Complete! 🎖️</h2>
+                <div id="final-stats" style="font-size: 1.5rem; margin: 20px 0;"></div>
+                <button class="start-btn" onclick="location.reload()">Replay Mission</button>
+            </div>
         </div>
 
-        <div id="quiz-area" class="hidden">
-            <div class="status-bar">
-                <span id="q-progress"></span>
-                <span id="timer">Time: 0s</span>
-            </div>
-            <div id="q-text" style="font-size: 1.25rem; margin-bottom: 20px; line-height: 1.5;"></div>
-            <div id="options-container"></div>
-            
-            <div id="analysis" class="hidden">
-                <h4 style="margin-top: 0;">Step-by-Step Analysis:</h4>
-                <p id="explain-text"></p>
-                <button id="next-btn" style="width: 100%;">Next Question →</button>
-            </div>
-        </div>
-
-        <div id="results" class="hidden">
-            <h2 style="text-align: center;">Week Complete! 🎉</h2>
-            <div id="final-stats" style="text-align: center; font-size: 1.2rem; margin-bottom: 20px;"></div>
-            
-            <h3>🏆 Weekly Leaderboard (<span id="week-label"></span>)</h3>
-            <table>
-                <thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr></thead>
-                <tbody id="leaderboard-body"></tbody>
+        <div class="sidebar">
+            <h3 style="margin-top: 0;">🏆 Top Heroes</h3>
+            <p style="font-size: 0.8rem; color: #888;">This Week: <span id="week-label"></span></p>
+            <table class="sb-table">
+                <thead><tr><th>Rank</th><th>Hero</th><th>Score</th><th>Time</th></tr></thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="4">Loading ranks...</td></tr>
+                </tbody>
             </table>
-            <button onclick="location.reload()" style="width:100%;">Take Quiz Again</button>
         </div>
     </div>
 
