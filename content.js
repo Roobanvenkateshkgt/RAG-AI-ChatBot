@@ -2,7 +2,7 @@ export const weeklyConfig = {
     weekID: "2026_JAN_W2",
     topicName: "AMC 8 Sprint: Ratios & Rates",
     topicDescription: "Master speed, ratios, and percentages to climb the leaderboard!",
-    lastWeekWinner: "none",
+    lastWeekWinner: "None",
     questions: [
         // MON: dayID 1 | TUE: 2 | WED: 3 | THU: 4 | FRI: 5
         { dayID: 1, q: "If $x:y = 3:4$ and $x=12$, what is $y$?", options: ["9", "16", "12", "15"], ans: 1, explain: "$12/3 = 4$, so $4 \\times 4 = 16$." },
