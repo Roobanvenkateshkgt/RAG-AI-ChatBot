@@ -21,8 +21,8 @@ export const weeklyConfig = {
         { dayID: 6, q: "Angle ratio 1:1:2. Largest angle?", options: ["45", "90", "60", "120"], ans: 1, explain: "2/4 * 180 = 90" },
         { dayID: 6, q: "2 cats catch 2 mice in 2 min. 10 cats catch 10 in...?", options: ["10 min", "2 min", "5 min", "20 min"], ans: 1, explain: "Rate is constant. 1 cat/1 mouse/2 min." },
 
-        { dayID: 1, q: "$10\\%$ then $10\\%$ increase. Total change?", options: ["$20\\%$", "$21\\%$", "$19\\%$", "$25\\%$"], ans: 1, explain: "$1.1 \\times 1.1 = 1.21$ (21% increase)." },
-        { dayID: 1, q: "Length:Width $4:1$. Perimeter $50$. Length?", options: ["10", "20", "40", "5"], ans: 1, explain: "$2(4x+x)=50 \\rightarrow 10x=50$. $4 \\times 5=20$." },
-        { dayID: 1, q: "Fill tank in $4$h. Drain in $12$h. Both open?", options: ["3h", "6h", "8h", "4h"], ans: 1, explain: "$1/4 - 1/12 = 1/6$ (6 hours)." }
+        { dayID: 6, q: "$10\\%$ then $10\\%$ increase. Total change?", options: ["$20\\%$", "$21\\%$", "$19\\%$", "$25\\%$"], ans: 1, explain: "$1.1 \\times 1.1 = 1.21$ (21% increase)." },
+        { dayID: 6, q: "Length:Width $4:1$. Perimeter $50$. Length?", options: ["10", "20", "40", "5"], ans: 1, explain: "$2(4x+x)=50 \\rightarrow 10x=50$. $4 \\times 5=20$." },
+        { dayID: 6, q: "Fill tank in $4$h. Drain in $12$h. Both open?", options: ["3h", "6h", "8h", "4h"], ans: 1, explain: "$1/4 - 1/12 = 1/6$ (6 hours)." }
     ]
 };
