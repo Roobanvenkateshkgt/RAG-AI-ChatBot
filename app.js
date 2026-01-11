@@ -2,14 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { weeklyConfig } from "./content.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAOlqpBpgaK1S7d2TCkWFTU7ZOdJdSBNBM",
-    authDomain: "amc8-74254.firebaseapp.com",
-    projectId: "amc8-74254",
-    storageBucket: "amc8-74254.firebasestorage.app",
-    messagingSenderId: "207658801952",
-    appId: "1:207658801952:web:46768e050a0430d5ab5545"
-};
+//api key
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
