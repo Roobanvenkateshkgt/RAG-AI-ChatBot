@@ -3,6 +3,14 @@ import { getFirestore, collection, addDoc, query, where, getDocs } from "https:/
 import { weeklyConfig } from "./content.js";
 
 //api key
+const firebaseConfig = {
+    apiKey: "AIzaSyAOlqpBpgaK1S7d2TCkWFTU7ZOdJdSBNBM",
+    authDomain: "amc8-74254.firebaseapp.com",
+    projectId: "amc8-74254",
+    storageBucket: "amc8-74254.firebasestorage.app",
+    messagingSenderId: "207658801952",
+    appId: "1:207658801952:web:46768e050a0430d5ab5545"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
