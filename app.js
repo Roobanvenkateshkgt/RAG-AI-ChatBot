@@ -61,7 +61,7 @@ function startTimer() {
 
 function renderQuestion() {
     const q = todayQuestions[currentQ];
-    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 3`;
+    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 15`;
     document.getElementById('q-text').innerHTML = q.q;
     const container = document.getElementById('options-container');
     container.innerHTML = "";
@@ -111,7 +111,7 @@ async function finishQuiz() {
         time: totalTime,
         date: new Date()
     });
-    alert(`Success! Score: ${score}/3`);
+    alert(`Success! Score: ${score}/15`);
     location.reload();
 }
 
