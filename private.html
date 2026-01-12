@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Sprint</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <style>
+        .hidden { display: none; }
+        .private-header { border-bottom: 3px solid #6a1b9a; padding-bottom: 10px; color: #6a1b9a; }
+    </style>
+</head>
+<body>
+    <div id="lock-screen">
+        <h1 class="private-header">🔒 Private AMC 8 Sprint</h1>
+        <p>This challenge is for invited heroes only. Enter the secret key to enter:</p>
+        <input type="password" id="secret-key" placeholder="Enter Key...">
+        <button id="unlock-btn" style="width:100%">Access Quiz</button>
+    </div>
+
+    <div id="quiz-content" class="hidden">
+        <h1 id="display-topic">Secret Challenge</h1>
+        <p>Good luck! This score will not be saved to the public leaderboard.</p>
+        <div id="q-text" style="font-size:1.2rem; margin:20px 0;"></div>
+        <div id="options-container"></div>
+        <button onclick="location.href='index.html'">Exit Private Mode</button>
+    </div>
+
+    <script>
+        const UNLOCK_KEY = "AMC2026"; // Change this to your secret password
+
+        document.getElementById('unlock-btn').onclick = () => {
+            const input = document.getElementById('secret-key').value;
+            if(input === UNLOCK_KEY) {
+                document.getElementById('lock-screen').classList.add('hidden');
+                document.getElementById('quiz-content').classList.remove('hidden');
+                // You can trigger a special function here to load private questions
+            } else {
+                alert("Incorrect Key! ❌");
+            }
+        };
+    </script>
+</body>
+</html>
