@@ -15,29 +15,26 @@
         .option-btn { width: 100%; margin: 8px 0; text-align: left; padding: 12px; cursor: pointer; border-radius: 8px; border: 1px solid #ccc; background: #fff; }
         .hall-of-fame { background: #fffde7; padding: 15px; border: 2px solid #fbc02d; border-radius: 12px; margin-bottom: 20px; }
         
-        /* ANIMATIONS */
+        /* PREMIUM ANIMATIONS */
         @keyframes success-pop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes oops-tilt { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+        @keyframes popup { 0% { transform: translate(-50%, -20%) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translate(-50%, -60%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -100%) scale(1); } }
         .correct-anim { animation: success-pop 0.4s ease-out; background-color: #e8f5e9 !important; border: 2px solid #2e7d32 !important; }
+        .wrong-anim { animation: oops-tilt 0.4s ease-in-out; background-color: #ffebee !important; border: 2px solid #c62828 !important; }
         .feedback-emoji { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; z-index: 1001; pointer-events: none; opacity: 0; }
         .show-emoji { animation: popup 1s ease-out; }
-        
-        /* THE SECRET TRIGGER: Transparent button in the bottom corner */
-        #secret-portal {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 30px;
-            height: 30px;
-            background: transparent;
-            cursor: default;
-            z-index: 9999;
-        }
+        .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 50%; animation: particles 0.8s ease-out forwards; pointer-events: none; z-index: 1000; }
+        @keyframes particles { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(0); opacity: 0; } }
+
+        /* SECRET PORTAL: Bottom Right Corner */
+        #secret-portal { position: fixed; bottom: 0; right: 0; width: 30px; height: 30px; background: transparent; z-index: 9999; cursor: default; }
 
         @media (max-width: 800px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div id="emoji-container" class="feedback-emoji"></div>
+    <div id="secret-portal" onclick="portalEntry()"></div>
 
     <nav class="top-nav">
         <a href="index.html">🏠 Home</a>
@@ -85,18 +82,12 @@
         </aside>
     </div>
 
-    <div id="secret-portal" onclick="portalEntry()"></div>
-
     <script type="module" src="app.js"></script>
-
     <script>
         function portalEntry() {
             const val = prompt("Enter System Access Key:");
-            // 'MTMwMzI1' is the Base64 version of '130325'
-            if (btoa(val) === "MTMwMzI1") {
-                window.location.href = "hello" + ".html";
-            } else {
-                console.warn("System Integrity Check Failed.");
+            if (btoa(val) === "MTMwMzI1") { // Base64 for 130325
+                window.location.href = "hello.html";
             }
         }
     </script>
