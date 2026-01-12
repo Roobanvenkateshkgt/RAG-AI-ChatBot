@@ -3,29 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>Admin Panel | Hero Academy</title>
+    
+    <script>
+        (function() {
+            const entry = prompt("🔒 Restricted Area - Enter System Key:");
+            // btoa("130325") results in "MTMwMzI1"
+            if (!entry || btoa(entry) !== "MTMwMzI1") {
+                alert("ACCESS DENIED: Invalid Credentials.");
+                window.location.href = "index.html";
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
+        body { padding: 20px; max-width: 800px; margin: auto; }
+        .admin-card { 
+            background: #f9f9f9; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid #005a9c; 
+            margin-top: 20px;
         }
-        .card {
-            padding: 2rem;
-            border: 2px solid #005a9c;
-            border-radius: 12px;
-            background: #f0f4f8;
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 0.8rem;
         }
+        .nav-link { font-weight: bold; text-decoration: none; color: #005a9c; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Hello World! 🌍</h1>
-        <p>This is your second page.</p>
-        <a href="index.html">⬅️ Back to AMC 8 Sprint</a>
+
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Admin Dashboard</h1>
+        <div class="status-badge">● System Online</div>
+    </header>
+
+    <hr>
+
+    <div class="admin-card">
+        <h2>Welcome, Admin 🛡️</h2>
+        <p>This is your private space to manage the AMC 8 Hero Academy.</p>
+        
+        <h3>Quick Tools</h3>
+        <ul>
+            <li><strong>View Database:</strong> Log in to your Firebase Console to see all student scores.</li>
+            <li><strong>Update Questions:</strong> Edit your <code>content.js</code> file to change next week's topic.</li>
+            <li><strong>Private Quiz:</strong> Prepare for the next invitation-only sprint.</li>
+        </ul>
+
+        <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+            <h4>Current System Settings</h4>
+            <code>Week ID: 2026_JAN_W3</code><br>
+            <code>Admin Passcode: Obfuscated (Base64)</code>
+        </div>
     </div>
+
+    <footer style="margin-top: 40px; text-align: center;">
+        <a href="index.html" class="nav-link">⬅️ Back to Public Website</a>
+    </footer>
+
 </body>
 </html>
