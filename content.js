@@ -1,7 +1,7 @@
 export const weeklyConfig = {
     weekID: "2026_JAN_W3",
     topicName: "AMC 8 Sprint: Master of Ratios",
-    topicDescription: "25-Question Challenge: From basic proportions to competition-level word problems.",
+    topicDescription: "25-Question Week Challenge: From basic proportions to competition-level word problems.",
     lastWeekWinner: "None",
     questions: [
         // --- MONDAY: BASIC RATIOS & PROPORTIONS (dayID 1) ---
