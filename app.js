@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { weeklyConfig } from "./content.js";
 
-//api key
 const firebaseConfig = {
     apiKey: "AIzaSyAOlqpBpgaK1S7d2TCkWFTU7ZOdJdSBNBM",
     authDomain: "amc8-74254.firebaseapp.com",
@@ -15,25 +14,30 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const todayNum = new Date().getDay(); 
-const todayQuestions = weeklyConfig.questions.filter(q => q.dayID === todayNum);
+// Global state
+let todayQuestions = [];
 let currentQ = 0, score = 0, startTime, timerInterval;
+const todayNum = new Date().getDay();
 
-// FIX: This wrapper ensures HTML is built before JS runs
 window.onload = () => {
+    // 1. FILTER QUESTIONS IMMEDIATELY ON LOAD
+    todayQuestions = weeklyConfig.questions.filter(q => q.dayID === todayNum);
+    console.log("System Day:", todayNum, "Questions found:", todayQuestions.length);
+
+    // 2. UPDATE UI
     const topicEl = document.getElementById('display-topic');
     const descEl = document.getElementById('display-desc');
     const dayEl = document.getElementById('display-day');
     const winnerEl = document.getElementById('last-winner');
 
-    // Safety checks: Only set text if the ID exists in HTML
-    if (topicEl) topicEl.innerText = weeklyConfig.topicName || "";
-    if (descEl) descEl.innerText = weeklyConfig.topicDescription || "";
+    if (topicEl) topicEl.innerText = weeklyConfig.topicName;
+    if (descEl) descEl.innerText = weeklyConfig.topicDescription;
     if (dayEl) dayEl.innerText = `Today is ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][todayNum]}`;
-    if (winnerEl) winnerEl.innerText = weeklyConfig.lastWeekWinner || "TBD";
+    if (winnerEl) winnerEl.innerText = weeklyConfig.lastWeekWinner;
 
     loadLeaderboard();
 
+    // 3. ATTACH EVENTS
     document.getElementById('start-btn').onclick = startQuiz;
     document.getElementById('next-btn').onclick = nextQuestion;
 };
@@ -41,7 +45,11 @@ window.onload = () => {
 function startQuiz() {
     const user = document.getElementById('username').value.trim();
     if(!user) return alert("Enter a name!");
-    if(todayQuestions.length === 0) return alert("No questions today!");
+    
+    // Check if we actually have questions for today
+    if(todayQuestions.length === 0) {
+        return alert("No questions found for today. Check your dayID in content.js!");
+    }
 
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
@@ -52,17 +60,14 @@ function startQuiz() {
 
 function startTimer() {
     timerInterval = setInterval(() => {
-        const timerEl = document.getElementById('timer');
-        if(timerEl) {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            timerEl.innerText = `⏱️ ${elapsed}s`;
-        }
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('timer').innerText = `⏱️ ${elapsed}s`;
     }, 1000);
 }
 
 function renderQuestion() {
     const q = todayQuestions[currentQ];
-    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 5`;
+    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of ${todayQuestions.length}`;
     document.getElementById('q-text').innerHTML = q.q;
     const container = document.getElementById('options-container');
     container.innerHTML = "";
@@ -104,6 +109,7 @@ async function finishQuiz() {
     clearInterval(timerInterval);
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
     const name = document.getElementById('username').value.trim();
+    
     await addDoc(collection(db, "sprints"), {
         weekID: weeklyConfig.weekID,
         day: todayNum,
@@ -112,7 +118,8 @@ async function finishQuiz() {
         time: totalTime,
         date: new Date()
     });
-    alert(`Success! Score: ${score}/15`);
+    
+    alert(`Success! Day Score: ${score}/${todayQuestions.length}`);
     location.reload();
 }
 
@@ -133,7 +140,7 @@ async function loadLeaderboard() {
         const lbBody = document.getElementById('leaderboard-body');
         if(lbBody) {
             lbBody.innerHTML = ranked.map((name, i) => `
-                <tr><td>${i+1}</td><td>${name}</td><td>${players[name].totalScore}/15</td><td>${players[name].totalTime}s</td></tr>
+                <tr><td>${i+1}</td><td>${name}</td><td>${players[name].totalScore}/25</td><td>${players[name].totalTime}s</td></tr>
             `).join('') || "<tr><td colspan='4'>No scores yet!</td></tr>";
         }
     } catch (e) { console.error(e); }
