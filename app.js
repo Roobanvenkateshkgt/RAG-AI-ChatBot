@@ -62,7 +62,7 @@ function startTimer() {
 
 function renderQuestion() {
     const q = todayQuestions[currentQ];
-    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 15`;
+    document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of 5`;
     document.getElementById('q-text').innerHTML = q.q;
     const container = document.getElementById('options-container');
     container.innerHTML = "";
