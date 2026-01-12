@@ -10,14 +10,45 @@
     <style>
         .dashboard { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
         .hidden { display: none; }
-        .correct { background: #2e7d32 !important; color: white; }
-        .incorrect { background: #d32f2f !important; color: white; }
-        .option-btn { width: 100%; margin: 8px 0; text-align: left; padding: 10px; cursor: pointer; }
-        .hall-of-fame { background: #fff3e0; padding: 15px; border: 2px solid #ffb300; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .option-btn { width: 100%; margin: 8px 0; text-align: left; padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        
+        /* Hall of Fame Styling */
+        .hall-of-fame { background: #fffde7; padding: 15px; border: 2px solid #fbc02d; border-radius: 12px; margin-bottom: 20px; }
+        .podium-item { margin: 5px 0; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes success-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(76, 175, 80, 0.4); }
+            100% { transform: scale(1); }
+        }
+        @keyframes oops-tilt {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+        @keyframes particles {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-80px) scale(0); opacity: 0; }
+        }
+        @keyframes popup {
+            0% { transform: translate(-50%, -20%) scale(0.5); opacity: 0; }
+            50% { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+        }
+
+        .correct-anim { animation: success-pop 0.4s ease-out; background-color: #e8f5e9 !important; border: 2px solid #2e7d32 !important; color: #1b5e20 !important; }
+        .wrong-anim { animation: oops-tilt 0.4s ease-in-out; background-color: #ffebee !important; border: 2px solid #c62828 !important; color: #b71c1c !important; }
+        .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 50%; animation: particles 0.8s ease-out forwards; pointer-events: none; z-index: 1000; }
+        .feedback-emoji { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; z-index: 1001; pointer-events: none; opacity: 0; }
+        .show-emoji { animation: popup 1s ease-out; }
+
         @media (max-width: 800px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+    <div id="emoji-container" class="feedback-emoji"></div>
+
     <div class="dashboard">
         <main>
             <h1 id="display-topic">Loading...</h1>
@@ -25,35 +56,42 @@
             <p id="display-day" style="font-weight:bold; color: #005a9c;"></p>
 
             <div id="setup">
-                <input type="text" id="username" placeholder="Hero Name...">
-                <button id="start-btn" style="width:100%">Start Today's Sprint</button>
+                <input type="text" id="username" placeholder="Enter your Hero Name...">
+                <button id="start-btn" style="width:100%; background: #005a9c; color: white;">Start Daily Sprint</button>
             </div>
 
             <div id="quiz-area" class="hidden">
-                <div style="display:flex; justify-content:space-between;">
-                    <span id="q-progress"></span>
+                <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+                    <span id="q-progress" style="font-weight:bold;"></span>
                     <span id="timer">⏱️ 0s</span>
                 </div>
-                <div id="q-text" style="font-size:1.2rem; margin:20px 0;"></div>
+                <div id="q-text" style="font-size:1.2rem; margin:20px 0; background: #fff; padding: 15px; border-radius: 8px; border-left: 5px solid #005a9c;"></div>
                 <div id="options-container"></div>
-                <div id="analysis" class="hidden" style="margin-top:20px; padding:15px; background:#f0f4f8;">
-                    <strong>Step-by-Step:</strong> <p id="explain-text"></p>
-                    <button id="next-btn" style="width:100%">Continue ➡️</button>
+                <div id="analysis" class="hidden" style="margin-top:20px; padding:15px; background:#e3f2fd; border-radius: 8px;">
+                    <strong>Solution:</strong> <p id="explain-text"></p>
+                    <button id="next-btn" style="width:100%">Next Question ➡️</button>
                 </div>
             </div>
         </main>
+
         <aside>
             <div class="hall-of-fame">
-                <h3 style="margin:0">👑 Previous King</h3>
-                <div id="last-winner"></div>
+                <h3 style="margin:0; font-size: 1.1rem;">🏆 Last Week's Podium</h3>
+                <div id="podium-list" style="margin-top: 10px;">
+                    <div class="podium-item" id="gold">🥇 Loading...</div>
+                    <div class="podium-item" id="silver">🥈 </div>
+                    <div class="podium-item" id="bronze">🥉 </div>
+                </div>
             </div>
-            <h3>🏆 Weekly Leaderboard</h3>
+
+            <h3>🏅 This Week's Ranks</h3>
             <table>
                 <thead><tr><th>#</th><th>Hero</th><th>Pts</th><th>Time</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </aside>
     </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
