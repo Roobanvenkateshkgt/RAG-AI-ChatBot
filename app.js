@@ -14,30 +14,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Global state
+// Global state variables
 let todayQuestions = [];
 let currentQ = 0, score = 0, startTime, timerInterval;
 const todayNum = new Date().getDay();
 
 window.onload = () => {
-    // 1. FILTER QUESTIONS IMMEDIATELY ON LOAD
+    // DEBUG: Check raw data
+    console.log("--- DEBUG: INITIAL LOAD ---");
+    console.log("System Day Number (0=Sun, 1=Mon):", todayNum);
+    console.log("Total questions in content.js:", weeklyConfig.questions.length);
+
     todayQuestions = weeklyConfig.questions.filter(q => q.dayID === todayNum);
-    console.log("System Day:", todayNum, "Questions found:", todayQuestions.length);
+    
+    // DEBUG: Check filtered data
+    console.log("Questions filtered for today:", todayQuestions);
+    console.log("todayQuestions.length is:", todayQuestions.length);
 
-    // 2. UPDATE UI
-    const topicEl = document.getElementById('display-topic');
-    const descEl = document.getElementById('display-desc');
-    const dayEl = document.getElementById('display-day');
-    const winnerEl = document.getElementById('last-winner');
-
-    if (topicEl) topicEl.innerText = weeklyConfig.topicName;
-    if (descEl) descEl.innerText = weeklyConfig.topicDescription;
-    if (dayEl) dayEl.innerText = `Today is ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][todayNum]}`;
-    if (winnerEl) winnerEl.innerText = weeklyConfig.lastWeekWinner;
+    // UI Updates
+    document.getElementById('display-topic').innerText = weeklyConfig.topicName;
+    document.getElementById('display-desc').innerText = weeklyConfig.topicDescription;
+    document.getElementById('display-day').innerText = `Today is ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][todayNum]}`;
+    document.getElementById('last-winner').innerText = weeklyConfig.lastWeekWinner;
 
     loadLeaderboard();
 
-    // 3. ATTACH EVENTS
     document.getElementById('start-btn').onclick = startQuiz;
     document.getElementById('next-btn').onclick = nextQuestion;
 };
@@ -46,29 +47,33 @@ function startQuiz() {
     const user = document.getElementById('username').value.trim();
     if(!user) return alert("Enter a name!");
     
-    // Check if we actually have questions for today
     if(todayQuestions.length === 0) {
-        return alert("No questions found for today. Check your dayID in content.js!");
+        console.error("ERROR: No questions found for dayID:", todayNum);
+        return alert("No questions found for today!");
     }
 
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
+    
     startTime = Date.now();
+    console.log("--- DEBUG: QUIZ STARTED ---");
+    console.log("User:", user);
+    console.log("Start Time Stamp:", startTime);
+
     startTimer();
     renderQuestion();
 }
 
-function startTimer() {
-    timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById('timer').innerText = `⏱️ ${elapsed}s`;
-    }, 1000);
-}
-
 function renderQuestion() {
     const q = todayQuestions[currentQ];
+    
+    // DEBUG: Question tracking
+    console.log(`--- DEBUG: RENDERING Q#${currentQ + 1} ---`);
+    console.log("Question Object:", q);
+
     document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of ${todayQuestions.length}`;
     document.getElementById('q-text').innerHTML = q.q;
+    
     const container = document.getElementById('options-container');
     container.innerHTML = "";
     
@@ -79,13 +84,21 @@ function renderQuestion() {
         btn.onclick = () => {
             const btns = container.querySelectorAll('button');
             btns.forEach(b => b.disabled = true);
+            
+            // DEBUG: Answer Selection
+            console.log(`User selected option index: ${i}`);
+            console.log(`Correct answer index: ${q.ans}`);
+
             if(i === q.ans) {
                 btn.classList.add('correct');
                 score++;
+                console.log("%c CORRECT! Current Score:", "color: green; font-weight: bold;", score);
             } else {
                 btn.classList.add('incorrect');
                 btns[q.ans].classList.add('correct');
+                console.log("%c WRONG. Score remains:", "color: red; font-weight: bold;", score);
             }
+            
             document.getElementById('explain-text').innerHTML = q.explain;
             document.getElementById('analysis').classList.remove('hidden');
             if (window.MathJax) MathJax.typesetPromise();
@@ -97,10 +110,13 @@ function renderQuestion() {
 
 function nextQuestion() {
     currentQ++;
+    console.log("Moving to next index:", currentQ);
+
     if(currentQ < todayQuestions.length) {
         document.getElementById('analysis').classList.add('hidden');
         renderQuestion();
     } else {
+        console.log("No more questions. Finishing quiz...");
         finishQuiz();
     }
 }
@@ -110,6 +126,11 @@ async function finishQuiz() {
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
     const name = document.getElementById('username').value.trim();
     
+    console.log("--- DEBUG: QUIZ FINISHED ---");
+    console.log("Final Score:", score);
+    console.log("Final Length:", todayQuestions.length);
+    console.log("Total Time (s):", totalTime);
+
     await addDoc(collection(db, "sprints"), {
         weekID: weeklyConfig.weekID,
         day: todayNum,
@@ -123,6 +144,13 @@ async function finishQuiz() {
     location.reload();
 }
 
+function startTimer() {
+    timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('timer').innerText = `⏱️ ${elapsed}s`;
+    }, 1000);
+}
+
 async function loadLeaderboard() {
     try {
         const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
@@ -133,15 +161,19 @@ async function loadLeaderboard() {
             players[d.name].totalScore += d.score;
             players[d.name].totalTime += d.time;
         });
+        
+        console.log("Leaderboard Data Processed:", players);
+
         const ranked = Object.keys(players).sort((a, b) => {
             if (players[b].totalScore !== players[a].totalScore) return players[b].totalScore - players[a].totalScore;
             return players[a].totalTime - players[b].totalTime;
         });
+        
         const lbBody = document.getElementById('leaderboard-body');
         if(lbBody) {
             lbBody.innerHTML = ranked.map((name, i) => `
                 <tr><td>${i+1}</td><td>${name}</td><td>${players[name].totalScore}/25</td><td>${players[name].totalTime}s</td></tr>
             `).join('') || "<tr><td colspan='4'>No scores yet!</td></tr>";
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Leaderboard Error:", e); }
 }
