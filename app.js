@@ -19,12 +19,7 @@ let currentQ = 0, score = 0, startTime, timerInterval;
 const todayNum = new Date().getDay();
 
 window.onload = () => {
-    // 1. FILTER QUESTIONS
     todayQuestions = weeklyConfig.questions.filter(q => Number(q.dayID) === Number(todayNum));
-    console.log("DEBUG: Current Day Index:", todayNum);
-    console.log("DEBUG: Questions found for today:", todayQuestions.length);
-
-    // 2. UI SETUP
     document.getElementById('display-topic').innerText = weeklyConfig.topicName;
     document.getElementById('display-desc').innerText = weeklyConfig.topicDescription;
     document.getElementById('display-day').innerText = `Today is ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][todayNum]}`;
@@ -38,9 +33,8 @@ window.onload = () => {
 
 function startQuiz() {
     const user = document.getElementById('username').value.trim();
-    if(!user) return alert("Please enter a name!");
-    if(todayQuestions.length === 0) return alert("No questions for today! Come back tomorrow.");
-
+    if(!user) return alert("Enter Name!");
+    if(todayQuestions.length === 0) return alert("No questions today!");
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     startTime = Date.now();
@@ -52,7 +46,6 @@ function renderQuestion() {
     const q = todayQuestions[currentQ];
     document.getElementById('q-progress').innerText = `Question ${currentQ + 1} of ${todayQuestions.length}`;
     document.getElementById('q-text').innerHTML = q.q;
-    
     const container = document.getElementById('options-container');
     container.innerHTML = "";
     
@@ -63,7 +56,6 @@ function renderQuestion() {
         btn.onclick = () => {
             const btns = container.querySelectorAll('button');
             btns.forEach(b => b.disabled = true);
-            
             if(i === q.ans) {
                 btn.classList.add('correct-anim');
                 score++;
@@ -74,7 +66,6 @@ function renderQuestion() {
                 btns[q.ans].classList.add('correct-anim');
                 showEmoji("🥺");
             }
-            
             document.getElementById('explain-text').innerHTML = q.explain;
             document.getElementById('analysis').classList.remove('hidden');
             if (window.MathJax) MathJax.typesetPromise();
@@ -98,39 +89,27 @@ async function finishQuiz() {
     clearInterval(timerInterval);
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
     const name = document.getElementById('username').value.trim();
-    
-    console.log("DEBUG: Final Result -", score, "/", todayQuestions.length);
-
     await addDoc(collection(db, "sprints"), {
-        weekID: weeklyConfig.weekID,
-        day: todayNum,
-        name: name,
-        score: score,
-        time: totalTime,
-        date: new Date()
+        weekID: weeklyConfig.weekID, day: todayNum, name: name, score: score, time: totalTime, date: new Date()
     });
-    
-    alert(`Sprint Complete! \nToday's Score: ${score}/${todayQuestions.length}`);
+    alert(`Success! Day Score: ${score}/${todayQuestions.length}`);
     location.reload();
 }
 
-// --- HELPER FUNCTIONS ---
-
 function startTimer() {
     timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById('timer').innerText = `⏱️ ${elapsed}s`;
+        document.getElementById('timer').innerText = `⏱️ ${Math.floor((Date.now() - startTime) / 1000)}s`;
     }, 1000);
 }
 
 function createConfetti(target) {
     const rect = target.getBoundingClientRect();
-    for(let i=0; i<12; i++) {
+    for(let i=0; i<8; i++) {
         const p = document.createElement('div');
         p.className = 'confetti-piece';
         p.style.left = (rect.left + rect.width/2) + 'px';
-        p.style.top = (rect.top + rect.height/2) + 'px';
-        p.style.backgroundColor = ['#ff4081','#ffeb3b','#00e676','#2979ff'][Math.floor(Math.random()*4)];
+        p.style.top = (rect.top) + 'px';
+        p.style.backgroundColor = ['#ff4081', '#ffeb3b', '#00e676', '#00e5ff'][Math.floor(Math.random()*4)];
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 800);
     }
@@ -144,38 +123,30 @@ function showEmoji(symbol) {
 }
 
 async function loadPreviousPodium() {
-    try {
-        const q = query(collection(db, "sprints"), where("weekID", "!=", weeklyConfig.weekID));
-        const snap = await getDocs(q);
-        let past = {};
-        snap.forEach(doc => {
-            const d = doc.data();
-            if(!past[d.name]) past[d.name] = { score: 0, time: 0 };
-            past[d.name].score += d.score;
-            past[d.name].time += d.time;
-        });
-        const ranked = Object.keys(past).sort((a,b) => (past[b].score - past[a].score) || (past[a].time - past[b].time));
-        
-        document.getElementById('gold').innerHTML = `🥇 ${ranked[0] || 'TBD'} (${past[ranked[0]]?.score || 0} pts)`;
-        document.getElementById('silver').innerHTML = `🥈 ${ranked[1] || '---'}`;
-        document.getElementById('bronze').innerHTML = `🥉 ${ranked[2] || '---'}`;
-    } catch (e) { console.error(e); }
+    const q = query(collection(db, "sprints"), where("weekID", "!=", weeklyConfig.weekID));
+    const snap = await getDocs(q);
+    let past = {};
+    snap.forEach(doc => {
+        const d = doc.data();
+        if(!past[d.name]) past[d.name] = { score: 0, time: 0 };
+        past[d.name].score += d.score; past[d.name].time += d.time;
+    });
+    const ranked = Object.keys(past).sort((a,b) => (past[b].score - past[a].score) || (past[a].time - past[b].time));
+    document.getElementById('gold').innerText = `🥇 ${ranked[0] || '---'}`;
+    document.getElementById('silver').innerText = `🥈 ${ranked[1] || '---'}`;
+    document.getElementById('bronze').innerText = `🥉 ${ranked[2] || '---'}`;
 }
 
 async function loadLeaderboard() {
-    try {
-        const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
-        let players = {};
-        snap.forEach(doc => {
-            const d = doc.data();
-            if(!players[d.name]) players[d.name] = { score: 0, time: 0 };
-            players[d.name].score += d.score;
-            players[d.name].time += d.time;
-        });
-        const ranked = Object.keys(players).sort((a,b) => (players[b].score - players[a].score) || (players[a].time - players[b].time));
-        const lbBody = document.getElementById('leaderboard-body');
-        lbBody.innerHTML = ranked.map((name, i) => `
-            <tr><td>${i+1}</td><td>${name}</td><td>${players[name].score}/25</td><td>${players[name].time}s</td></tr>
-        `).join('') || "<tr><td colspan='4'>No scores yet!</td></tr>";
-    } catch (e) { console.error(e); }
+    const snap = await getDocs(query(collection(db, "sprints"), where("weekID", "==", weeklyConfig.weekID)));
+    let players = {};
+    snap.forEach(doc => {
+        const d = doc.data();
+        if(!players[d.name]) players[d.name] = { score: 0, time: 0 };
+        players[d.name].score += d.score; players[d.name].time += d.time;
+    });
+    const ranked = Object.keys(players).sort((a,b) => (players[b].score - players[a].score) || (players[a].time - players[b].time));
+    document.getElementById('leaderboard-body').innerHTML = ranked.map((name, i) => `
+        <tr><td>${i+1}</td><td>${name}</td><td>${players[name].score}/25</td><td>${players[name].time}s</td></tr>
+    `).join('') || "<tr><td colspan='4'>No scores!</td></tr>";
 }
